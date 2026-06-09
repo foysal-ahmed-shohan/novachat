@@ -15,7 +15,9 @@
   const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
   let convs = load();
-  let currentId = convs[0]?.id || newConv();
+  // NOTE: don't call newConv() here — it assigns currentId, which is still in its TDZ.
+  // init() creates a conversation when none exist.
+  let currentId = convs[0]?.id || null;
   let pendingImage = null; // data URL
   let streaming = false;
 
