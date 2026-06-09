@@ -171,9 +171,35 @@ async def _polli_reply(messages: list[dict]) -> AsyncIterator[str]:
 
 # ---------------- Public ----------------
 async def stream_reply(messages: list[dict]) -> AsyncIterator[str]:
-    if using_gemini():
-        async for c in _gemini_stream(messages):
-            yield c
-    else:
+    if not using_gemini():
         async for c in _polli_reply(messages):
             yield c
+        return
+
+    # Gemini with one retry on 429 (free-tier rate limit), then keyless fallback,
+    # so a brief rate limit never shows the user a raw error.
+    last_err = ""
+    for attempt in range(2):
+        emitted = False
+        try:
+            async for c in _gemini_stream(messages):
+                emitted = True
+                yield c
+            return
+        except Exception as e:
+            last_err = str(e)
+            if emitted:
+                return  # already streaming; don't restart mid-reply
+            if "429" in last_err and attempt == 0:
+                await asyncio.sleep(3)  # rate limited — wait and retry once
+                continue
+            break
+
+    # Gemini unavailable without having emitted anything -> use the keyless fallback
+    try:
+        async for c in _polli_reply(messages):
+            yield c
+        return
+    except Exception:
+        pass
+    yield "⚠️ The AI is busy right now (rate limit). Please try again in a few seconds."
