@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: novachat
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # set in dashboard / via API (secret)
+      - key: NOVA_MODEL
+        value: gemini-2.0-flash

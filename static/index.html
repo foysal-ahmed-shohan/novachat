@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NovaChat — Your AI Assistant</title>
+  <meta name="description" content="NovaChat — an intelligent AI chat assistant. Ask anything, upload images, use your voice." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.9/dist/purify.min.js"></script>
+  <link rel="stylesheet" href="/static/styles.css?v=1" />
+</head>
+<body>
+  <div class="app" id="app">
+    <!-- Sidebar -->
+    <aside class="side" id="side">
+      <button class="newchat" id="newChat">＋ New chat</button>
+      <div class="convs" id="convs"></div>
+      <div class="side__foot">
+        <div class="brand"><span class="brand__logo">✦</span> NovaChat</div>
+        <div class="side__model" id="sideModel">AI assistant</div>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <button class="iconbtn" id="menuBtn" aria-label="Menu">☰</button>
+        <div class="topbar__title"><span class="brand__logo">✦</span> NovaChat</div>
+        <button class="iconbtn" id="newChatTop" aria-label="New chat">＋</button>
+      </header>
+
+      <div class="chat" id="chat">
+        <!-- welcome injected when empty -->
+      </div>
+
+      <!-- Composer -->
+      <div class="composer">
+        <div class="composer__inner">
+          <div class="attach-preview" id="attachPreview" hidden>
+            <img id="attachImg" alt="attachment" />
+            <button id="attachRemove" aria-label="Remove image">✕</button>
+          </div>
+          <div class="inputrow">
+            <button class="iconbtn" id="attachBtn" title="Attach image" aria-label="Attach image">📎</button>
+            <input type="file" id="fileInput" accept="image/*" hidden />
+            <textarea id="input" rows="1" placeholder="Message NovaChat…  (ask anything)"></textarea>
+            <button class="iconbtn mic" id="micBtn" title="Voice input" aria-label="Voice input">🎤</button>
+            <button class="sendbtn" id="sendBtn" aria-label="Send" disabled>➤</button>
+          </div>
+          <p class="composer__hint">NovaChat can make mistakes. It may ask a clarifying question. Press Enter to send · Shift+Enter for newline.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/app.js?v=1"></script>
+</body>
+</html>
