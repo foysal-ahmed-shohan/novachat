@@ -1,4 +1,4 @@
-"""LLM layer for NovaChat.
+"""LLM layer for Apollo Chat.
 
 Two providers, auto-selected:
   1. Google Gemini  — used when GEMINI_API_KEY is set (reliable + image vision, free tier).
@@ -28,7 +28,7 @@ POLLI_URL = "https://text.pollinations.ai/openai"
 POLLI_GET = "https://text.pollinations.ai/"
 
 SYSTEM_PROMPT = (
-    "You are NovaChat, a friendly, highly knowledgeable AI assistant. "
+    "You are Apollo Chat, a friendly, highly knowledgeable AI assistant. "
     "Answer clearly, accurately and helpfully, using Markdown (headings, lists, bold, and "
     "fenced code blocks with language tags when relevant). "
     "If a request is ambiguous or missing key details needed to answer well, briefly ask one "

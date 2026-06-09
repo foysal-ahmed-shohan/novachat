@@ -1,4 +1,4 @@
-# ✦ NovaChat — AI Chat Assistant
+# ✦ Apollo Chat — AI Chat Assistant
 
 A real, ChatGPT-style AI assistant. Ask anything in text, **upload images** to ask about them,
 use **voice input**, and get **streaming** answers with Markdown + code formatting. Conversations
@@ -38,5 +38,5 @@ uvicorn app.main:app --reload --port 8000   # http://localhost:8000
 - `GET /api/health` — `{ ok, configured, model }`
 
 ## Notes
-LLMs have a knowledge cutoff, so very recent events may not be known — NovaChat will say so
+LLMs have a knowledge cutoff, so very recent events may not be known — Apollo Chat will say so
 rather than invent facts. Add web search later for live info.

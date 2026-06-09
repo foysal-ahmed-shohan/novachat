@@ -82,7 +82,7 @@
     const bodyHTML = ai ? `<div class="md">${md(m.content)}</div>` : `${img}<div class="md">${md(esc(m.content))}</div>`;
     return `<div class="msg msg--${ai ? "ai" : "user"}">
       <div class="msg__av">${ai ? "✦" : "You"}</div>
-      <div class="msg__body"><div class="msg__name">${ai ? "NovaChat" : "You"}</div>${ai ? img + bodyHTML : bodyHTML}</div>
+      <div class="msg__body"><div class="msg__name">${ai ? "Apollo Chat" : "You"}</div>${ai ? img + bodyHTML : bodyHTML}</div>
     </div>`;
   }
   function scrollDown() { const ch = $("#chat"); ch.scrollTop = ch.scrollHeight; }

@@ -1,9 +1,9 @@
-# NovaChat — project CLAUDE.md
+# Apollo Chat — project CLAUDE.md
 
 > GLOBAL rules live in `workspace/CLAUDE.md`. This file holds THIS project's specifics.
 
 ## What it is
-A real, ChatGPT-style AI assistant ("NovaChat"). Users ask anything (text), upload images
+A real, ChatGPT-style AI assistant ("Apollo Chat"). Users ask anything (text), upload images
 (vision), use voice input, and get streaming Markdown answers. Multi-turn memory; asks a
 clarifying question when a request is ambiguous. Conversations saved in localStorage.
 
