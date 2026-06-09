@@ -16,6 +16,7 @@ import asyncio
 import json
 import os
 from typing import AsyncIterator
+from urllib.parse import quote
 
 import httpx
 
@@ -23,6 +24,7 @@ API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
 MODEL = os.environ.get("NOVA_MODEL", "gemini-2.0-flash").strip()
 GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 POLLI_URL = "https://text.pollinations.ai/openai"
+POLLI_GET = "https://text.pollinations.ai/"
 
 SYSTEM_PROMPT = (
     "You are NovaChat, a friendly, highly knowledgeable AI assistant. "
@@ -114,40 +116,57 @@ def _openai_messages(messages: list[dict]) -> list[dict]:
     return out
 
 
+def _flat_prompt(messages: list[dict]) -> str:
+    """Compact the conversation into one prompt for the keyless GET endpoint."""
+    lines = [SYSTEM_PROMPT, ""]
+    for m in messages[-8:]:
+        who = "Assistant" if m.get("role") == "assistant" else "User"
+        txt = (m.get("content") or "").strip()
+        if m.get("image") and who == "User":
+            txt = (txt + " [user attached an image]").strip()
+        if txt:
+            lines.append(f"{who}: {txt}")
+    lines.append("Assistant:")
+    prompt = "\n".join(lines)
+    if len(prompt) > 1800:
+        prompt = SYSTEM_PROMPT + "\n\n" + prompt[-1700:]
+    return prompt
+
+
+async def _emit_words(text: str) -> AsyncIterator[str]:
+    buf = ""
+    for tok in text.split(" "):
+        buf += tok + " "
+        if len(buf) > 22:
+            yield buf
+            buf = ""
+            await asyncio.sleep(0)
+    if buf:
+        yield buf
+
+
 async def _polli_reply(messages: list[dict]) -> AsyncIterator[str]:
-    payload = {"model": "openai", "messages": _openai_messages(messages), "private": True}
+    """Keyless fallback. Uses the GET endpoint (more reliable than the OpenAI POST one)."""
+    url = POLLI_GET + quote(_flat_prompt(messages), safe="") + "?model=openai&referrer=novachat"
     last_err = ""
-    async with httpx.AsyncClient(timeout=httpx.Timeout(120.0, connect=20.0)) as client:
-        for attempt in range(4):
+    async with httpx.AsyncClient(timeout=httpx.Timeout(90.0, connect=20.0)) as client:
+        for attempt in range(3):
             try:
-                r = await client.post(POLLI_URL, json=payload)
-                if r.status_code == 200:
-                    text = ""
-                    try:
-                        data = r.json()
-                        text = data["choices"][0]["message"]["content"]
-                    except Exception:
-                        text = r.text
-                    text = (text or "").strip()
-                    if text:
-                        # emit in word chunks for a natural "typing" effect
-                        buf = ""
-                        for tok in text.split(" "):
-                            buf += tok + " "
-                            if len(buf) > 24:
-                                yield buf
-                                buf = ""
-                                await asyncio.sleep(0)
-                        if buf:
-                            yield buf
-                        return
-                    last_err = "empty response"
-                else:
-                    last_err = f"HTTP {r.status_code}"
+                r = await client.get(url)
+                body = (r.text or "").strip()
+                bad = r.status_code != 200 or body.startswith('{"error"') or not body
+                if not bad:
+                    async for c in _emit_words(body):
+                        yield c
+                    return
+                last_err = f"HTTP {r.status_code}"
             except Exception as e:
                 last_err = str(e)
-            await asyncio.sleep(1.2 * (attempt + 1))  # backoff on 429/transient
-    raise RuntimeError(f"keyless AI endpoint busy ({last_err}). Add a free GEMINI_API_KEY for reliable answers.")
+            await asyncio.sleep(0.7 * (attempt + 1))
+    raise RuntimeError(
+        f"the free shared AI endpoint is busy right now ({last_err}). "
+        "Tip: add a free GEMINI_API_KEY for fast, reliable answers and image support."
+    )
 
 
 # ---------------- Public ----------------

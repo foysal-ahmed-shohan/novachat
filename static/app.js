@@ -3,9 +3,15 @@
   const $ = (s) => document.querySelector(s);
   const LS = "novachat.convs.v1";
 
-  marked.setOptions({ breaks: true, gfm: true });
-  const md = (t) => DOMPurify.sanitize(marked.parse(t || ""));
-  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const esc = (s) => String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  // Markdown is a progressive enhancement — never let a missing/blocked CDN break the chat.
+  const HAS_MD = typeof marked !== "undefined" && typeof DOMPurify !== "undefined";
+  if (HAS_MD) { try { marked.setOptions({ breaks: true, gfm: true }); } catch (_) {} }
+  const md = (t) => {
+    t = t || "";
+    if (HAS_MD) { try { return DOMPurify.sanitize(marked.parse(t)); } catch (_) {} }
+    return esc(t).replace(/\n/g, "<br>");
+  };
   const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 
   let convs = load();
